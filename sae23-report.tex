@@ -1,5 +1,6 @@
 % !TEX encoding = UTF-8 Unicode
 \documentclass{article}
+\usepackage[french]{babel}
 \author{Louis DESVERNOIS}
 \title{Procédure d'installation et de déploiement pour la SAÉ23.}
 \date{9 Juin 2022}
@@ -41,8 +42,8 @@
 %\setcounter{tocdepth}{3} % + subsubsections
 %\setcounter{tocdepth}{4} % + paragraphs
 %\setcounter{tocdepth}{5} % + subparagraphs
-\renewcommand{\contentsname}{Tables des matières} % Change le nom de la ToC
-\renewcommand{\listfigurename}{Liste des figures}
+%\renewcommand{\contentsname}{Tables des matières} % Change le nom de la ToC
+%\renewcommand{\listfigurename}{Liste des figures}
 \renewcommand{\refname}{Bibliographie} % Change le nom des références (bibname pour les classes book et report)
 
 \begin{document}
@@ -52,5 +53,7 @@
     \newpage
     \section{Environnement}
         \subsection{Machine virtuelle}
-            Notre solution se base sur une machine virtuelle utilisant la dernière version de Debian 11.
+            Notre solution se base sur une machine virtuelle utilisant la dernière version de Debian 11. La technologie utilisée pour créer cette machine virtuelle n'a peu d'importance, tant que celle-ci est accessible (eg: carte réseau en mode bridge).
+        \subsection{Environnement virtuel Python}
+            Pour faire fonctionner Django, nous allons avoir besoin d'un environnement virtuel (venv) pour installer Django et ses dépendances sans les installer pour tout le système. Travailler avec des venv permet de garantir que paquets installés soient toujours les mêmes. Le module \verb|venv| de Python nous permet de créer ces environnements avec la commande \verb|py -m venv .venv|.
 \end{document}
