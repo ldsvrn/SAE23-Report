@@ -1,0 +1,56 @@
+% !TEX encoding = UTF-8 Unicode
+\documentclass{article}
+\author{Louis DESVERNOIS}
+\title{Procédure d'installation et de déploiement pour la SAÉ23.}
+\date{9 Juin 2022}
+\usepackage{amsmath}
+\usepackage[margin=1in]{geometry}
+\usepackage{graphicx}
+\usepackage{subcaption}
+\usepackage{listings}
+\usepackage{color}
+
+% Style pour le code
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+\lstdefinestyle{monstyle}{
+    backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=2
+}
+
+\lstset{style=monstyle}
+%\setcounter{tocdepth}{1} % Show sections
+%\setcounter{tocdepth}{2} % + subsections
+%\setcounter{tocdepth}{3} % + subsubsections
+%\setcounter{tocdepth}{4} % + paragraphs
+%\setcounter{tocdepth}{5} % + subparagraphs
+\renewcommand{\contentsname}{Tables des matières} % Change le nom de la ToC
+\renewcommand{\listfigurename}{Liste des figures}
+\renewcommand{\refname}{Bibliographie} % Change le nom des références (bibname pour les classes book et report)
+
+\begin{document}
+    \maketitle
+    \tableofcontents
+    \listoffigures
+    \newpage
+    \section{Environnement}
+        \subsection{Machine virtuelle}
+            Notre solution se base sur une machine virtuelle utilisant la dernière version de Debian 11.
+\end{document}
