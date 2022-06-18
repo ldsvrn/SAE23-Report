@@ -10,7 +10,7 @@
 \usepackage{listings}
 \usepackage{minted}
 \usepackage{graphicx}
-
+\usepackage[T1]{fontenc}
 \usepackage[colorlinks=true,linkcolor=black,anchorcolor=black,citecolor=black,filecolor=black,menucolor=black,runcolor=black,urlcolor=black]{hyperref}
 %\setcounter{tocdepth}{1} % Show sections
 %\setcounter{tocdepth}{2} % + sections
@@ -199,4 +199,59 @@ systemctl enable gunicorn.socket
             \caption{Activation du socket Gunicorn}
             \label{code:enable-gunicorn} 
         \end{listing}
+
+        \subsection{Nginx}
+        Une fois Gunicorn correctement paramétré, nous pouvons configurer Nginx pour rediriger les connexions sur le socket. Pour cela il faut créer un fichier \emph{site} en suivant la bonne syntaxe.
+        \begin{listing}[H]
+            \begin{minted}[breaklines]{bash}
+server {
+    listen 80;
+    server_name sae23.louis.systems;
+    location = /favicon.ico { access_log off; log_not_found off; }
+    location /static/ {
+        root /home/toto/django;
+    }
+    location / {
+        include proxy_params;
+        proxy_pass http://unix:/run/gunicorn.sock;
+    }
+}
+            \end{minted}
+            \caption{/etc/nginx/sites-available/sae23}
+            \label{code:sae23-site} 
+        \end{listing}
+        Pour cet exemple, Nginx écoute sur le port 80 et si un client se connecte en utilisant le domaine \verb|sae23.louis.systems|
+        \footnote{Il s'agit du domaine d'un VPS utilisé pour tester le déploiement, car nous n'avons pas réussi à utiliser les cartes bridges sans les droits d'administrateur sur les PC fixes},
+        il redirige /static vers le répertoire précédemment configuré, le reste est redirigé vers le socket Gunicorn.
+        Une fois ce fichier crée, nous devons l'activer avec un lien symbolique.
+        \begin{listing}[H]
+            \begin{minted}[breaklines]{bash}
+ln -s /etc/nginx/sites-available/sae23 /etc/nginx/sites-enabled/
+            \end{minted}
+            \caption{Activation du site Nginx}
+            \label{code:nginx-site-active} 
+        \end{listing}
+        Pour finir, nous pouvons redémarrer le service Nginx avec systemd pour prendre en compte les changements.
+        \begin{listing}[H]
+            \begin{minted}[breaklines]{bash}
+systemctl restart nginx
+            \end{minted}
+            \caption{Redémarrage du service Nginx}
+            \label{code:nginx-restart} 
+        \end{listing}
+    
+\section{Script de déploiement automatique}
+    Pour faciliter le déploiement, nous avons écrit un simple script bash permettant d'automatiser toutes les étapes de cette procédure dans une VM de Debian 11 fraîchement installée avec un accès root
+    \footnote{Le script crée un utilisateur "toto", il est donc préférable que celui-ci n'existe pas déjà}.
+    Pour utiliser ce script, nous pouvons simplement utiliser \verb|curl|\footnote{Il est normalement préférable pour la sécurité de lire un script avant de l'exécuter} pour le télécharger directement de GitHub.
+    \begin{listing}[H]
+        \begin{minted}[breaklines]{bash}
+apt install curl
+curl -sSL https://raw.githubusercontent.com/ldsvrn/SAE23-TraficAerien/main/server_install.sh | bash
+        \end{minted}
+        \caption{Exécution du script de déploiement automatique}
+        \label{code:script-curl} 
+    \end{listing}
+    Une fois le script exécuté, il est normalement possible d'accéder au serveur.
+    Malheureusement, le script n'est pas interactif, il n'est donc pas universel, en effet, certains détails tels que le \verb|ALLOWED_HOSTS| de Django ou le \verb|server_name| de Nginx nécessitent d'être modifiés en fonction de l'adresse du serveur. Une solution serait de créer une image Docker du projet.
 \end{document}
