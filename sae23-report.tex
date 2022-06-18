@@ -12,6 +12,7 @@
 \usepackage{listings}
 \usepackage{minted}
 \usepackage{newfloat}
+\usepackage[colorlinks=true,linkcolor=black,anchorcolor=black,citecolor=black,filecolor=black,menucolor=black,runcolor=black,urlcolor=black]{hyperref}
 %\setcounter{tocdepth}{1} % Show sections
 %\setcounter{tocdepth}{2} % + sections
 %\setcounter{tocdepth}{3} % + subsections
@@ -21,64 +22,87 @@
 %\renewcommand{\listfigurename}{Liste des figures}
 \usepackage{minted,xcolor,chngcntr}
 
-% Style Minted
-\usemintedstyle{default}
-\definecolor{codebg}{rgb}{0.96,0.96,0.96}
-\newminted{python}{bgcolor=codebg,
-                    linenos=true,
-                    frame=lines,
-                    numbersep=5pt,
-                    fontsize=\footnotesize}
 \renewcommand{\listoflistingscaption}{Table des codes}
 \renewcommand{\listingscaption}{Code}
 % \renewcommand{\bibname}{Bibliographie} % Change le nom des références (bibname pour les classes book et report)
 
 \begin{document}
-    \maketitle
-    \tableofcontents
-    \listoffigures
-    \listoflistings
-    \newpage
-    \section{Machine virtuelle et base de données}
-        Notre solution se base sur une machine virtuelle utilisant la dernière version de Debian 11. La technologie utilisée pour créer cette machine virtuelle n'a peu d'importance, tant que celle-ci est accessible (eg: carte réseau en mode bridge).
-            \subsection{Installations des dépendances}
-            Après l'installation d'un système minimal Debian 11, nous avons besoin d'installer les différents composant nécessaire au déploiement d'un serveur MariaDB ainsi qu'un serveur HTTP nginx.
-            \begin{listing}[H]
-                \begin{minted}[breaklines]{bash}
-        apt install git mariadb-server nginx python3 python3-pip python3-venv python3-dev libmariadb-dev ufw -y               
-                \end{minted}
-                \caption{Installation des dépendance}
-                \label{lst:deps-install}
-            \end{listing}
-            \subsection{Configuration de la base de données}
-            En installant le paquet \verb|mariadb-server|, le gestionnaire de paquets apt a déjà automatique activé le service. Il nous reste donc qu'a configurer le serveur.
-            \begin{listing}[H]
-                \begin{minted}[breaklines]{sql}
-        mysql -sfu root <<EOS
-        UPDATE mysql.user SET Password=PASSWORD('toto') WHERE User='root';
-        DELETE FROM mysql.user WHERE User='';
-        DROP DATABASE IF EXISTS test;
-        DELETE FROM mysql.db WHERE Db='test' OR Db='test\\_%';
-        FLUSH PRIVILEGES;
-        CREATE USER 'toto'@'localhost';
-        EOS
-                \end{minted}
-                \caption{Configuration initiale du serveur MariaDB}
-            \end{listing}
-            Pour la configuration nous utilisons la commande \verb|mysql -sfu root| pour nous connecter à la base de données et ignorer les erreurs. Pour commencer, nous changeons le mot de passe de l'utilisateur "root", nous supprimons tous les utilisateurs anonymes, nous supprimons la base de données "test" si elle existe, puis nous créons l'utilisateur "toto", qui permettera à Django d'accéder à la base de données.
-    \section{Environnement virtuel Python}
-        Pour faire fonctionner Django, nous allons avoir besoin d'un environnement virtuel (venv) pour installer Django et ses dépendances sans les installer pour tout le système. Travailler avec des venv permet de garantir que paquets installés soient toujours les mêmes. 
-            \subsection{Création de l'environnement}
-            Le module \verb|venv| de Python nous permet de créer ces environnements facilement avec la commande \verb|python -m venv .venv|. En supposant que l'on utilise le shell bash, nous pouvons ensuite activer cet environnement grâce à la commande \verb|source|.
-            \begin{listing}[H]
-                \begin{minted}{bash}
+
+\maketitle
+\tableofcontents
+\listoffigures
+\listoflistings
+\newpage
+\section{Machine virtuelle et base de données}
+    Notre solution se base sur une machine virtuelle utilisant la dernière version de Debian 11. La technologie utilisée pour créer cette machine virtuelle n'a peu d'importance, tant que celle-ci est accessible (eg: carte réseau en mode bridge). 
+
+        \subsection{Installations des dépendances}
+        Après l'installation d'un système minimal Debian 11, nous avons besoin d'installer les différents composant nécessaire au déploiement d'un serveur MariaDB ainsi qu'un serveur HTTP nginx.
+        \begin{listing}[H]
+            \begin{minted}[breaklines]{bash}
+apt install git mariadb-server nginx python3 python3-pip python3-venv python3-dev libmariadb-dev ufw -y               
+            \end{minted}
+            \caption{Installation des dépendance}
+            \label{code:deps-install}
+        \end{listing}
+
+        \subsection{Configuration initiale de la base de données}
+        En installant le paquet \verb|mariadb-server|, le gestionnaire de paquets apt a déjà automatique activé le service. Il nous reste donc qu'a configurer le serveur.
+        \begin{listing}[H]
+            \begin{minted}[breaklines]{sql}
+mysql -sfu root <<EOS
+UPDATE mysql.user SET Password=PASSWORD('toto') WHERE User='root';
+DELETE FROM mysql.user WHERE User='';
+DROP DATABASE IF EXISTS test;
+DELETE FROM mysql.db WHERE Db='test' OR Db='test\\_%';
+FLUSH PRIVILEGES;
+CREATE USER 'toto'@'localhost';
+EOS
+            \end{minted}
+            \caption{Configuration initiale du serveur MariaDB}
+            \label{code:initdbconf}
+        \end{listing}
+        Pour la configuration nous utilisons la commande \verb|mysql -sfu root| pour nous connecter à la base de données et ignorer les erreurs (Code \ref{code:initdbconf}). Pour commencer, nous changeons le mot de passe de l'utilisateur "root", nous supprimons tous les utilisateurs anonymes, nous supprimons la base de données "test" si elle existe, puis nous créons l'utilisateur "toto", qui permettera à Django d'accéder à la base de données.
+
+        \subsection{Création de l'utilisateur, clonage du dépot GitHub et execution du script SQL}
+        Pour des raisons de sécurité, est préférable de ne pas éxécuter le code python de notre site avec le super-utilisateur, c'est pour cela que nous créons un utilisateur ainsi que son dossier personnel sur notre serveur. 
+        \begin{listing}[H]
+            \begin{minted}[breaklines]{bash}
+useradd -m toto
+su - toto -c "git clone https://github.com/ldsvrn/SAE23-TraficAerien /home/toto/django"
+            \end{minted}
+            \caption{Création de l'utilisateur et clonage du dépôt GitHub}
+            \label{code:newutil}
+        \end{listing}
+        Après la création de l'utilisateur avec la commande \verb|useradd -m|, nous pouvons cloner le dépôt avec la commande \verb|git clone <url> <dst>|
+        \footnote{\label{note1}"su - toto -c" est utilisé dans le code \ref{code:newutil} pour exécuter la commande avec l'utilisateur toto}.
+
+        \begin{listing}[H]
+            \begin{minted}[breaklines]{bash}
+mysql -u root -p'toto' < /home/toto/django/SAE_23_BDD.sql
+mysql -sfu root -p'toto'<<EOS
+-- permission d'acces à la base de donnée
+GRANT ALL PRIVILEGES ON sae_23.* TO 'toto'@'localhost';
+EOS
+            \end{minted}
+            \caption{Importation de notre script SQL}
+            \label{code:execsql}
+        \end{listing}
+        Ensuite, nous pouvons utiliser les commandes ci-dessus (\ref{code:execsql}) pour importer notre script SQL préalablement téléchargé lors du \verb|git clone| éxécuté précédemment (Code \ref{code:newutil}). Nous octroyons ensuite à l'utilisateur "toto" tous les droits sur la base de données importée.
+
+\section{Environnement virtuel Python}
+    Pour faire fonctionner Django, nous allons avoir besoin d'un environnement virtuel (venv) pour installer Django et ses dépendances sans les installer pour tout le système. Travailler avec des venv permet de garantir que paquets installés soient toujours les mêmes. 
+        \subsection{Création de l'environnement}
+        Le module \verb|venv| de Python nous permet de créer ces environnements facilement avec la commande \verb|python -m venv .venv|. En supposant que l'on utilise le shell bash, nous pouvons ensuite activer cet environnement grâce à la commande \verb|source|.
+        \begin{listing}[H]
+            \begin{minted}{bash}
         python -m venv .venv
         source .venv/bin/activate
-                \end{minted}
-                \caption{Création et activation du venv}
-                \label{lst:creation-venv}
-            \end{listing}
+            \end{minted}
+            \caption{Création et activation du venv}
+            \label{code:creation-venv}
+        \end{listing}
 
-            \subsection{Installation des paquets}
+        \subsection{Installation des paquets}
 
 \end{document}
