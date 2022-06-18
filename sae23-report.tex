@@ -38,12 +38,12 @@
             \begin{minted}[breaklines]{bash}
 apt install git mariadb-server nginx python3 python3-pip python3-venv python3-dev libmariadb-dev ufw -y
             \end{minted}
-            \caption{Installation des dépendance}
+            \caption{Installation des dépendances}
             \label{code:deps-install}
         \end{listing}
 
         \subsection{Configuration initiale de la base de données}
-        En installant le paquet \verb|mariadb-server|, le gestionnaire de paquets apt a déjà automatique activé le service. Il nous reste donc qu'a configurer le serveur.
+        En installant le paquet \verb|mariadb-server|, le gestionnaire de paquets apt a déjà automatique activé le service. Il nous reste donc qu'à configurer le serveur.
         \begin{listing}[H]
             \begin{minted}[breaklines]{sql}
 mysql -sfu root <<EOS
@@ -58,10 +58,10 @@ EOS
             \caption{Configuration initiale du serveur MariaDB}
             \label{code:initdbconf}
         \end{listing}
-        Pour la configuration nous utilisons la commande \verb|mysql -sfu root| pour nous connecter à la base de données et ignorer les erreurs (Code \ref{code:initdbconf}). Pour commencer, nous changeons le mot de passe de l'utilisateur "root", nous supprimons tous les utilisateurs anonymes, nous supprimons la base de données "test" si elle existe, puis nous créons l'utilisateur "toto", qui permettera à Django d'accéder à la base de données.
+        Pour la configuration, nous utilisons la commande \verb|mysql -sfu root| pour nous connecter à la base de données et ignorer les erreurs (Code \ref{code:initdbconf}). Pour commencer, nous changeons le mot de passe de l'utilisateur "root", nous supprimons tous les utilisateurs anonymes, nous supprimons la base de données "test" si elle existe, puis nous créons l'utilisateur "toto", qui permettra à Django d'accéder à la base de données.
 
-        \subsection{Création de l'utilisateur, clonage du dépot GitHub et execution du script SQL}
-        Pour des raisons de sécurité, est préférable de ne pas éxécuter le code python de notre site avec le super-utilisateur, c'est pour cela que nous créons un utilisateur ainsi que son dossier personnel sur notre serveur. 
+        \subsection{Création de l'utilisateur, clonage du dépôt GitHub et exécution du script SQL}
+        Pour des raisons de sécurité, est préférable de ne pas exécuter le code python de notre site avec le super-utilisateur, c'est pour cela que nous créons un utilisateur ainsi que son dossier personnel sur notre serveur. 
         \begin{listing}[H]
             \begin{minted}[breaklines]{bash}
 useradd -m toto
@@ -84,15 +84,17 @@ EOS
             \caption{Importation de notre script SQL}
             \label{code:execsql}
         \end{listing}
-        Ensuite, nous pouvons utiliser les commandes ci-dessus (\ref{code:execsql}) pour importer notre script SQL préalablement téléchargé lors du \verb|git clone| éxécuté précédemment (Code \ref{code:newutil}). Nous octroyons ensuite à l'utilisateur "toto" tous les droits sur la base de données importée.
+        Ensuite, nous pouvons utiliser les commandes ci-dessus (\ref{code:execsql}) pour importer notre script SQL préalablement téléchargé lors du \verb|git clone| exécuté précédemment (Code \ref{code:newutil}). Nous octroyons ensuite à l'utilisateur "toto" tous les droits sur la base de données importée.
 
 \section{Environnement virtuel Python}
     Pour faire fonctionner Django, nous allons avoir besoin d'un environnement virtuel (venv) pour installer Django et ses dépendances sans les installer pour tout le système. Travailler avec des venv permet de garantir que paquets installés soient toujours les mêmes. 
 
         \subsection{Création de l'environnement et installation des paquets}
-        Le module \verb|venv| de Python nous permet de créer ces environnements facilement avec la commande \verb|python -m venv .venv|. En supposant que l'on utilise le shell bash, nous pouvons ensuite activer cet environnement grâce à la commande \verb|source|.
-        Une fois l'environnement virtuel activé, nous pouvons simplement utiliser \verb|pip3| pour intaller les dépendances de notre projet \footnote{\label{note2}Il est églament possible d'utiliser le fichier requirements.txt avec la commande "pip3 install -r requirements.txt"}. 
-        Nous pouvons donc éxécuter les commandes suivantes, cette fois ci avec l'utilisateur créé précédemment (Code \ref{code:newutil}). 
+        Le module \verb|venv| de Python nous permet de créer ces environnements facilement avec la commande \verb|python -m venv .venv|.
+        En supposant que l'on utilise le shell bash, nous pouvons ensuite activer cet environnement grâce à la commande \verb|source|.
+        Une fois l'environnement virtuel activé, nous pouvons simplement utiliser \verb|pip3| pour installer les dépendances de notre projet
+        \footnote{\label{note2}Il est également possible d'utiliser le fichier requirements.txt avec la commande "pip3 install -r requirements.txt"}. 
+        Nous pouvons donc exécuter les commandes suivantes, cette fois ci avec l'utilisateur créé précédemment (Code \ref{code:newutil}). 
         \begin{listing}[H]
             \begin{minted}{bash}
 python -m venv .venv
@@ -104,8 +106,9 @@ pip3 install django django-admin mysqlclient gunicorn crispy-bootstrap5 Pillow r
         \end{listing}
         
         \subsection{Configuration du projet Django (settings.py)}
-        Une fois toutes dépendances python intallées dans l'environnement virtuel, nous devons modifier les paramètres de notre projet Django afin d'utiliser la base de données externe. Il est intéressant de vérifier si le répertoire des fichiers statiques (eg: images, css, etc) est correctement configuré
-        \footnote{\label{note3}Normalement cela est déjà configuré automatiquement à la création du projet}. 
+        Une fois toutes dépendances python installées dans l'environnement virtuel, nous devons modifier les paramètres de notre projet Django afin d'utiliser la base de données externe.
+        Il est intéressant de vérifier si le répertoire des fichiers statiques (eg: images, css, etc) est correctement configuré
+        \footnote{\label{note3}Normalement, cela est déjà configuré automatiquement à la création du projet}. 
         \begin{listing}[H]
             \begin{minted}{python}
 DATABASES = {
@@ -123,4 +126,18 @@ DATABASES = {
             \label{code:settings.py-db}
         \end{listing}
         
+        \subsection{Préparation du projet au déploiement}
+        Avant de commencer à mettre en place notre serveur web, nous avons besoin de préparer notre projet au déploiement.
+        Pour cela nous devons utiliser le fichier \verb|manage.py| pour préparer la base de données ainsi que les fichiers statiques. En nous plaçant à la racine de notre projet, nous pouvons exécuter les commandes suivantes
+        \footnote{Commandes à exécuter avec l'utilisateur crée en Code \ref{code:newutil}}.
+        \begin{listing}[H]
+            \begin{minted}{bash}
+python3 manage.py makemigration
+python3 manage.py migrate
+python3 manage.py collectstatic
+            \end{minted}
+            \caption{Préparation de la base de données et copie des fichiers statiques}
+            \label{code:manage.py}
+        \end{listing}
+        Les commandes \verb|migrate| et \verb|makemigration| préparent la base de données pour son utilisation par Django, tandis que \verb|collectstatic| s'occupe de copier les fichiers statiques vers le répertoire configuré dans \verb|settings.py|.
 \end{document}
