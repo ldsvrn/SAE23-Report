@@ -5,13 +5,10 @@
 \author{Louis DESVERNOIS}
 \title{Procédure d'installation et de déploiement pour la SAÉ23.}
 % \date{9 Juin 2022}
-\usepackage{amsmath}
 \usepackage[margin=1in]{geometry}
-\usepackage{graphicx}
 \usepackage{subcaption}
 \usepackage{listings}
 \usepackage{minted}
-\usepackage{newfloat}
 \usepackage[colorlinks=true,linkcolor=black,anchorcolor=black,citecolor=black,filecolor=black,menucolor=black,runcolor=black,urlcolor=black]{hyperref}
 %\setcounter{tocdepth}{1} % Show sections
 %\setcounter{tocdepth}{2} % + sections
@@ -20,7 +17,6 @@
 %\setcounter{tocdepth}{5} % + subparagraphs
 %\renewcommand{\contentsname}{Tables des matières} % Change le nom de la ToC
 %\renewcommand{\listfigurename}{Liste des figures}
-\usepackage{minted,xcolor,chngcntr}
 
 \renewcommand{\listoflistingscaption}{Table des codes}
 \renewcommand{\listingscaption}{Code}
@@ -40,7 +36,7 @@
         Après l'installation d'un système minimal Debian 11, nous avons besoin d'installer les différents composant nécessaire au déploiement d'un serveur MariaDB ainsi qu'un serveur HTTP nginx.
         \begin{listing}[H]
             \begin{minted}[breaklines]{bash}
-apt install git mariadb-server nginx python3 python3-pip python3-venv python3-dev libmariadb-dev ufw -y               
+apt install git mariadb-server nginx python3 python3-pip python3-venv python3-dev libmariadb-dev ufw -y
             \end{minted}
             \caption{Installation des dépendance}
             \label{code:deps-install}
@@ -92,17 +88,39 @@ EOS
 
 \section{Environnement virtuel Python}
     Pour faire fonctionner Django, nous allons avoir besoin d'un environnement virtuel (venv) pour installer Django et ses dépendances sans les installer pour tout le système. Travailler avec des venv permet de garantir que paquets installés soient toujours les mêmes. 
-        \subsection{Création de l'environnement}
+
+        \subsection{Création de l'environnement et installation des paquets}
         Le module \verb|venv| de Python nous permet de créer ces environnements facilement avec la commande \verb|python -m venv .venv|. En supposant que l'on utilise le shell bash, nous pouvons ensuite activer cet environnement grâce à la commande \verb|source|.
+        Une fois l'environnement virtuel activé, nous pouvons simplement utiliser \verb|pip3| pour intaller les dépendances de notre projet \footnote{\label{note2}Il est églament possible d'utiliser le fichier requirements.txt avec la commande "pip3 install -r requirements.txt"}. 
+        Nous pouvons donc éxécuter les commandes suivantes, cette fois ci avec l'utilisateur créé précédemment (Code \ref{code:newutil}). 
         \begin{listing}[H]
             \begin{minted}{bash}
-        python -m venv .venv
-        source .venv/bin/activate
+python -m venv .venv
+source .venv/bin/activate
+pip3 install django django-admin mysqlclient gunicorn crispy-bootstrap5 Pillow reportlab
             \end{minted}
-            \caption{Création et activation du venv}
+            \caption{Création du venv et installation des paquets}
             \label{code:creation-venv}
         \end{listing}
-
-        \subsection{Installation des paquets}
-
+        
+        \subsection{Configuration du projet Django (settings.py)}
+        Une fois toutes dépendances python intallées dans l'environnement virtuel, nous devons modifier les paramètres de notre projet Django afin d'utiliser la base de données externe. Il est intéressant de vérifier si le répertoire des fichiers statiques (eg: images, css, etc) est correctement configuré
+        \footnote{\label{note3}Normalement cela est déjà configuré automatiquement à la création du projet}. 
+        \begin{listing}[H]
+            \begin{minted}{python}
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'sae_23',
+        'USER': 'toto',
+        'PASSWORD': '',
+        'HOST': 'localhost',
+        'PORT': '3306',
+    }
+}
+            \end{minted}
+            \caption{settings.py: Paramétrages de la base de données}
+            \label{code:settings.py-db}
+        \end{listing}
+        
 \end{document}
