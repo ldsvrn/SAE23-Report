@@ -42,7 +42,7 @@
     Notre solution se base sur une machine virtuelle utilisant la dernière version de Debian 11. La technologie utilisée pour créer cette machine virtuelle n'a peu d'importance, tant que celle-ci est accessible (e.g., carte réseau en mode bridge). 
 
         \subsection{Installation des dépendances}
-        Après l'installation d'un système minimal Debian 11, nous avons besoin d'installer les différents composants nécessaires au déploiement d'un serveur MariaDB ainsi qu'un serveur HTTP nginx.
+        Après l'installation d'un système minimal Debian 11, nous avons besoin d'installer les différents composants nécessaires au déploiement d'un serveur MariaDB ainsi qu'un serveur HTTP Nginx.
         \begin{listing}[H]
             \begin{minted}[breaklines]{bash}
 apt install git mariadb-server nginx python3 python3-pip python3-venv python3-dev libmariadb-dev ufw -y
@@ -151,8 +151,8 @@ python3 manage.py collectstatic
         Les commandes \verb|migrate| et \verb|makemigration| préparent la base de données pour son utilisation par Django, tandis que \verb|collectstatic| copie les fichiers statiques vers le répertoire configuré dans \verb|settings.py|.
 
 \section{Mise en place de Gunicorn et du serveur web Nginx}
-    Maintenant que notre projet Django est correctement configuré, il ne reste plus que le serveur web à mettre en place. Pour cela, nous allons utiliser \verb|gunicorn|, installé en Code \ref{code:creation-venv}, pour interfacer Django avec nginx.
-    En effet, il est impossible de directement utiliser nginx pour distribuer les pages de notre site, dans notre cas, nginx va être configuré comme un \emph{reverse proxy} à Gunicorn.
+    Maintenant que notre projet Django est correctement configuré, il ne reste plus que le serveur web à mettre en place. Pour cela, nous allons utiliser \verb|gunicorn|, installé en Code \ref{code:creation-venv}, pour interfacer Django avec Nginx.
+    En effet, il est impossible de directement utiliser Nginx pour distribuer les pages de notre site, dans notre cas, nous allons le configurer comme un \emph{reverse proxy} à Gunicorn.
     \begin{figure}[H]
         \includegraphics[width=\linewidth]{fig/gunicorn.jpeg}
         \caption{Nginx + Gunicorn + Systemd + Django}
