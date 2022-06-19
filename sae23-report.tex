@@ -116,8 +116,9 @@ pip3 install django django-admin mysqlclient gunicorn crispy-bootstrap5 Pillow r
         
         \subsection{Configuration du projet Django (settings.py)}
         Une fois toutes dépendances python installées dans l'environnement virtuel, nous devons modifier les paramètres de notre projet Django afin d'utiliser la base de données externe.
-        Il est intéressant de vérifier si le répertoire des fichiers statiques (e.g., images, css) est correctement configuré
-        \footnote{\label{note3}Normalement, cela est déjà configuré automatiquement à la création du projet}. 
+        Il est intéressant de vérifier si le répertoire des fichiers statiques
+        \footnote{\label{note3}Normalement, cela est déjà configuré automatiquement à la création du projet}
+        ainsi que la variable \verb|ALLOWED_HOSTS| sont correctement configuré.
         \begin{listing}[H]
             \begin{minted}{python}
 DATABASES = {
